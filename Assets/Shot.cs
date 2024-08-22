@@ -44,8 +44,7 @@ public class Shot : MonoBehaviour
         {
             Shoot();
         }
-        transform.localRotation = Quaternion.Euler(-moveRotX.value,0,0);
-        transform.localRotation = Quaternion.Euler(-moveRotZ.value,0,0);
+        transform.localRotation = Quaternion.Euler(-moveRotX.value,0, moveRotZ.value);
     }
 
     void Shoot()
@@ -82,6 +81,8 @@ public class Shot : MonoBehaviour
         {
             fixedJointsBreakForce[0].breakForce = newForce;
             fixedJointsBreakForce[1].breakForce = newForce;
+            fixedJointsBreakForce[0].breakTorque = newForce;
+            fixedJointsBreakForce[1].breakTorque = newForce;
         }
         else
         {

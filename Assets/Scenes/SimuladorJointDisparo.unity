@@ -569,9 +569,9 @@ FixedJoint:
   m_BreakForce: 2
   m_BreakTorque: Infinity
   m_EnableCollision: 0
-  m_EnablePreprocessing: 1
+  m_EnablePreprocessing: 0
   m_MassScale: 1
-  m_ConnectedMassScale: 1
+  m_ConnectedMassScale: 0.00001
 --- !u!1 &227164147
 GameObject:
   m_ObjectHideFlags: 0
@@ -641,9 +641,9 @@ FixedJoint:
   m_BreakForce: 2
   m_BreakTorque: Infinity
   m_EnableCollision: 0
-  m_EnablePreprocessing: 1
+  m_EnablePreprocessing: 0
   m_MassScale: 1
-  m_ConnectedMassScale: 1
+  m_ConnectedMassScale: 0.00001
 --- !u!54 &264125660
 Rigidbody:
   m_ObjectHideFlags: 0
