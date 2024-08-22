@@ -10,6 +10,7 @@ public class Shot : MonoBehaviour
     [SerializeField] float shootForce;
     [SerializeField] GameObject bullet;
     [SerializeField] Slider moveRotX;
+    [SerializeField] Slider moveRotZ;
     [SerializeField] InputField updateShootForce;
     [SerializeField] InputField updateBreakForce;
     [SerializeField] FixedJoint[] fixedJointsBreakForce;
@@ -26,6 +27,7 @@ public class Shot : MonoBehaviour
             Debug.Log("La fuerza del disparo no es suficiente para romper la junta.");
         }
         moveRotX.maxValue = 360;
+        moveRotZ.maxValue = 360;
         updateShootForce.onEndEdit.AddListener(UpdateShootForce);
         updateBreakForce.onEndEdit.AddListener(UpdateBreakForce);
     }
@@ -43,6 +45,7 @@ public class Shot : MonoBehaviour
             Shoot();
         }
         transform.localRotation = Quaternion.Euler(-moveRotX.value,0,0);
+        transform.localRotation = Quaternion.Euler(-moveRotZ.value,0,0);
     }
 
     void Shoot()
