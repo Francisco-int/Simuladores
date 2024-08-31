@@ -11,10 +11,20 @@ public class Shot : MonoBehaviour
     [SerializeField] GameObject bullet;
     [SerializeField] Slider moveRotX;
     [SerializeField] Slider moveRotZ;
+    [SerializeField] Slider movePositionX;
     [SerializeField] InputField updateShootForce;
     [SerializeField] InputField updateBreakForce;
     [SerializeField] FixedJoint[] fixedJointsBreakForce;
-    
+
+    private float lastShootForce;
+    private float lastAngleX;
+    private float lastAngleZ;
+    private float lastPositionX;
+
+    [SerializeField] Text newEntry;
+    public GameObject scrollViewContent;
+    public GameObject textPrefab;
+
     // Start is called before the first frame update
     void Start()
     {
@@ -35,7 +45,7 @@ public class Shot : MonoBehaviour
     // Update is called once per frame
     void Update()
     {
-        
+
         if (Input.GetKeyDown(KeyCode.R))
         {
             SceneManager.LoadScene(0);
@@ -44,16 +54,39 @@ public class Shot : MonoBehaviour
         {
             Shoot();
         }
+
+        transform.position = new Vector3(movePositionX.value, transform.position.y, transform.position.z);
+
         transform.localRotation = Quaternion.Euler(-moveRotX.value,0, moveRotZ.value);
+        newEntry.text = $"Fuerza del disparo: "+ shootForce +"\n聲gulo X: " + moveRotX.value +"\n聲gulo Z: "+ moveRotZ.value +"\nPosici鏮 X: " + transform.position.x;
+
     }
 
     void Shoot()
     {
+        lastShootForce = shootForce;
+        lastAngleX = moveRotX.value;
+        lastAngleZ = moveRotZ.value;
+        lastPositionX = transform.position.x;
+
         GameObject projectile = Instantiate(bullet, shootPoint.position, shootPoint.rotation);
         Rigidbody rb = projectile.GetComponent<Rigidbody>();
         rb.AddForce(shootPoint.up * shootForce);
         Destroy(projectile, 4f );
+
+
+        Debug.Log("Fuerza del disparo: " + lastShootForce);
+        Debug.Log("聲gulo X del disparo: " + lastAngleX);
+        Debug.Log("聲gulo Z del disparo: " + lastAngleZ);
+        Debug.Log("Posici鏮 X del ca嚧n: " + lastPositionX);
+
+        newEntry.text = $"Fuerza del disparo: {lastShootForce}\n聲gulo X: {lastAngleX}\n聲gulo Z: {lastAngleZ}\nPosici鏮 X: {lastPositionX}";
+
+        GameObject newTextObject = Instantiate(textPrefab, scrollViewContent.transform);
+        Text newTextComponent = newTextObject.GetComponent<Text>();
+        newTextComponent.text = newEntry.text;
     }
+
     void UpdateShootForce(string input)
     {
         float newForce;
