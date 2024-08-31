@@ -3,6 +3,8 @@ using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.SceneManagement;
 using UnityEngine.UI;
+using static UnityEditor.Timeline.TimelinePlaybackControls;
+using static UnityEngine.GraphicsBuffer;
 
 public class Shot : MonoBehaviour
 {
@@ -16,15 +18,25 @@ public class Shot : MonoBehaviour
     [SerializeField] InputField updateBreakForce;
     [SerializeField] FixedJoint[] fixedJointsBreakForce;
 
+    [SerializeField] Transform target;
+    [SerializeField] Text logText;
+
     private float lastShootForce;
     private float lastAngleX;
     private float lastAngleZ;
     private float lastPositionX;
 
+    [SerializeField] float time;
+
     [SerializeField] Text newEntry;
     public GameObject scrollViewContent;
     public GameObject textPrefab;
 
+    [SerializeField] int numberOfSimulations;
+    private int successfulHits = 0;
+
+    [SerializeField] bool ableMonte;
+    int disparos;
     // Start is called before the first frame update
     void Start()
     {
@@ -45,6 +57,7 @@ public class Shot : MonoBehaviour
     // Update is called once per frame
     void Update()
     {
+         time += Time.deltaTime;
 
         if (Input.GetKeyDown(KeyCode.R))
         {
@@ -54,6 +67,14 @@ public class Shot : MonoBehaviour
         {
             Shoot();
         }
+        if (Input.GetKeyDown(KeyCode.M))
+        {
+            ableMonte = !ableMonte;
+        }
+        if (ableMonte)
+        {
+            RunMonteCarloSimulation();
+        }
 
         transform.position = new Vector3(movePositionX.value, transform.position.y, transform.position.z);
 
@@ -62,8 +83,9 @@ public class Shot : MonoBehaviour
 
     }
 
-    void Shoot()
+   public void Shoot()
     {
+        disparos++;
         lastShootForce = shootForce;
         lastAngleX = moveRotX.value;
         lastAngleZ = moveRotZ.value;
@@ -85,6 +107,16 @@ public class Shot : MonoBehaviour
         GameObject newTextObject = Instantiate(textPrefab, scrollViewContent.transform);
         Text newTextComponent = newTextObject.GetComponent<Text>();
         newTextComponent.text = newEntry.text;
+
+        if (CheckHitTarget(projectile))
+        {
+            successfulHits++;
+        }
+        if(disparos == numberOfSimulations)
+        {
+            ableMonte = false;
+            disparos = 0;
+        }
     }
 
     void UpdateShootForce(string input)
@@ -130,4 +162,56 @@ public class Shot : MonoBehaviour
             Debug.Log("La fuerza del disparo no es suficiente para romper la junta.");
         }
     }
+    void RunMonteCarloSimulation()
+    {
+        successfulHits = 0;
+
+        for (int i = 0; i < numberOfSimulations; i++)
+        {
+            if(time > 5)
+            {
+                time = 0;
+                SimulateShot();
+            }
+            
+        }
+
+
+        
+    }
+
+    void SimulateShot()
+    {
+        float hitProbability = (float)successfulHits / numberOfSimulations;
+        logText.text += $"\nProbabilidad de impactar el objetivo: {hitProbability * 100}%";
+        Debug.Log($"Probabilidad de impactar el objetivo: {hitProbability * 100}%");
+
+        shootForce = Random.Range(300f, 600f); 
+        moveRotX.value = Random.Range(5f, 90f);
+        moveRotZ.value = Random.Range(-30f, 30);
+        movePositionX.value = Random.Range(0f,8f);
+
+        Shoot();
+
+    }
+
+    bool CheckHitTarget(GameObject projectile)
+    {
+        // Detectar si el proyectil impacta el objetivo
+        RaycastHit hit;
+        if (Physics.Raycast(projectile.transform.position, projectile.transform.forward, out hit, 100f))
+        {
+            if (hit.transform == target)
+            {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    IEnumerator AntiCrash()
+    {
+        yield return new WaitForSeconds(5);
+    }
 }
+
