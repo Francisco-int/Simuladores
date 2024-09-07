@@ -192,7 +192,6 @@ public class Shot : MonoBehaviour
         movePositionX.value = Random.Range(0f,8f);
 
         Shoot();
-
     }
 
     bool CheckHitTarget(GameObject projectile)
