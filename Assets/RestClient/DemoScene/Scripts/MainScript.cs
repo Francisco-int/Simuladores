@@ -22,22 +22,21 @@ public class MainScript : MonoBehaviour {
 	public void Get(){
 
 		// We can add default request headers for all requests
-		RestClient.DefaultRequestHeaders["Authorization"] = "Bearer ...";
 
 		RequestHelper requestOptions = null;
 
-		RestClient.GetArray<Post>(basePath + "/posts").Then(res => {
+		RestClient.GetArray<Post>(basePath + "/posts.json").Then(res => {
 			this.LogMessage("Posts", JsonHelper.ArrayToJsonString<Post>(res, true));
-			return RestClient.GetArray<Todo>(basePath + "/todos");
+			return RestClient.GetArray<Todo>(basePath + "/todos.json");
 		}).Then(res => {
 			this.LogMessage("Todos", JsonHelper.ArrayToJsonString<Todo>(res, true));
-			return RestClient.GetArray<User>(basePath + "/users");
+			return RestClient.GetArray<User>(basePath + "/users.json");
 		}).Then(res => {
 			this.LogMessage("Users", JsonHelper.ArrayToJsonString<User>(res, true));
 
 			// We can add specific options and override default headers for a request
 			requestOptions = new RequestHelper { 
-				Uri = basePath + "/photos",
+				Uri = basePath + "/photos.json",
 				Headers = new Dictionary<string, string> {
 					{ "Authorization", "Other token..." }
 				},
@@ -60,7 +59,7 @@ public class MainScript : MonoBehaviour {
 		RestClient.DefaultRequestParams["param3"] = "My other param";
 
 		currentRequest = new RequestHelper {
-			Uri = basePath + "/posts",
+			Uri = basePath + "/posts.json",
 			Params = new Dictionary<string, string> {
 				{ "param1", "value 1" },
 				{ "param2", "value 2" }
@@ -86,7 +85,7 @@ public class MainScript : MonoBehaviour {
 	public void Put(){
 
 		currentRequest = new RequestHelper {
-			Uri = basePath + "/posts/1", 
+			Uri = basePath + "/posts/1.json", 
 			Body = new Post {
 				title = "foo",
 				body = "bar",
@@ -110,7 +109,7 @@ public class MainScript : MonoBehaviour {
 
 	public void Delete(){
 
-		RestClient.Delete(basePath + "/posts/1", (err, res) => {
+		RestClient.Delete(basePath + "/posts/1.json", (err, res) => {
 			if (err != null){
 				this.LogMessage("Error", err.Message);
 			}
