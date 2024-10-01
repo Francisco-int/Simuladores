@@ -8,6 +8,8 @@ using static UnityEngine.GraphicsBuffer;
 
 public class Shot : MonoBehaviour
 {
+    [SerializeField] Vector3 spacingViewButton;
+    [SerializeField] DataTrackerScript dataTrackerScript;
     [SerializeField] Transform shootPoint;
     [SerializeField] float shootForce;
     [SerializeField] GameObject bullet;
@@ -31,6 +33,8 @@ public class Shot : MonoBehaviour
     [SerializeField] Text newEntry;
     public GameObject scrollViewContent;
     public GameObject textPrefab;
+    public GameObject buttonSimulatePrefab;
+    public GameObject buttonDeletePrefab;
 
     [SerializeField] int numberOfSimulations;
     private int successfulHits = 0;
@@ -57,6 +61,7 @@ public class Shot : MonoBehaviour
     // Update is called once per frame
     void Update()
     {
+        transform.position = transform.position + spacingViewButton;
          time += Time.deltaTime;
 
         if (Input.GetKeyDown(KeyCode.R))
@@ -83,7 +88,7 @@ public class Shot : MonoBehaviour
 
     }
 
-   public void Shoot()
+    public void Shoot()
     {
         disparos++;
         lastShootForce = shootForce;
@@ -94,7 +99,7 @@ public class Shot : MonoBehaviour
         GameObject projectile = Instantiate(bullet, shootPoint.position, shootPoint.rotation);
         Rigidbody rb = projectile.GetComponent<Rigidbody>();
         rb.AddForce(shootPoint.up * shootForce);
-        Destroy(projectile, 4f );
+        Destroy(projectile, 4f);
 
 
         Debug.Log("Fuerza del disparo: " + lastShootForce);
@@ -108,6 +113,9 @@ public class Shot : MonoBehaviour
         Text newTextComponent = newTextObject.GetComponent<Text>();
         newTextComponent.text = newEntry.text;
 
+        dataTrackerScript.Put(lastShootForce, lastAngleX, lastAngleZ, lastPositionX);
+        
+
         if (CheckHitTarget(projectile))
         {
             successfulHits++;
@@ -117,6 +125,7 @@ public class Shot : MonoBehaviour
             ableMonte = false;
             disparos = 0;
         }
+       
     }
 
     void UpdateShootForce(string input)
@@ -211,6 +220,24 @@ public class Shot : MonoBehaviour
     IEnumerator AntiCrash()
     {
         yield return new WaitForSeconds(5);
+    }
+    public void CreateButton(string nameKey)
+    {
+       GameObject newButtonObject = Instantiate(buttonSimulatePrefab, scrollViewContent.transform);
+        newButtonObject.name = nameKey;
+    } 
+    public void Delete(string nameKey)
+    {
+       GameObject newButtonObject = Instantiate(buttonDeletePrefab, scrollViewContent.transform);
+        newButtonObject.name = nameKey;
+    }
+   public void ShotUniqueKey(float shootForcer,float rotX, float rotZ,float potX)
+    {
+        Debug.Log("Modification");
+        shootForce = shootForcer;
+        moveRotX.value = rotX;
+        moveRotZ.value = rotZ;
+        movePositionX.value = potX;
     }
 }
 

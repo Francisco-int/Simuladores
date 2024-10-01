@@ -4,28 +4,29 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEditor.PackageManager;
 using UnityEngine;
+using static DataTrackerScript;
 
 public class DataTrackerScript : MonoBehaviour
 {
-    private readonly string baseUrl = "https://uu89-aa8bf-default-rtdb.firebaseio.com/";
-    private readonly string Environment = "String";
-    public string gameName = "Name";
-
+    [SerializeField] Shot shotScript;
+    private readonly string baseUrl = "https://simuladores-e51e9-default-rtdb.firebaseio.com/";
+    private readonly string Environment = "game";
+    public string gameName = "Simulator";
+    public string uniqueShotName;
     [Serializable]
     public class Game
     {
         public int timeStarted;
         public int timeEnded;
-        public Shot[] shots;
+        public Shoot shots;
     }
     [Serializable]
-    public class Shot
+    public class Shoot
     {
         public float angleX;
         public float angleY;
-        public Vector3 vector;
+        public float posX;
         public float force;
-        public int hits;
         public int time;
     }
 
@@ -33,48 +34,71 @@ public class DataTrackerScript : MonoBehaviour
     {
         return baseUrl+ "/" + Environment + "/" + gameName+ ".json";
     }
-    public void Get()
+    private string URLShoot()
     {
-        RestClient.Get(BuildURL(), GetHelper);
+        return baseUrl+ "/" + Environment + "/" + gameName+ "/"+ uniqueShotName+".json";
+    }
+    private void Update()
+    {
+        if (Input.GetKeyDown(KeyCode.T))
+        {
+            Get(URLShoot());           
+        }
     }
 
+    private string URLShootButton(String uniqueKeyy)
+    {
+        return baseUrl + "/" + Environment + "/" + gameName + "/" + uniqueKeyy + ".json";
+    }
+    public void CallGet(String uniqueKey1)
+    {
+        Get(URLShootButton(uniqueKey1));
+    }
+    public void CallDelete(String uniqueKey1)
+    {
+        Get(URLShootButton(uniqueKey1));
+    }
+   
+    public void Get(string uniqueKey)
+    {
+        RestClient.Get(uniqueKey, GetHelper);
+    }
+    public void Delete(string uniqueKeyDelete)
+    {
+        RestClient.Delete(uniqueKeyDelete);
+    }
     public void GetHelper(RequestException exception, ResponseHelper response)
     {
-        Game game =  JsonUtility.FromJson<Game>(response.Text);
-        Debug.Log(game);
+        Game game = JsonUtility.FromJson<Game>(response.Text);
 
-        foreach(Shot shot in game.shots)
-        {
-            Debug.Log(shot.force);
-        }
-       Debug.Log(response.StatusCode + " data:" + response.Text);
+        Debug.Log(game.shots.force + game.shots.angleX + game.shots.angleY + game.shots.posX);
+        shotScript.ShotUniqueKey(game.shots.force,game.shots.angleX,game.shots.angleY, game.shots.posX);
+
+
+        Debug.Log(response.StatusCode + " data:" + response.Text);
+
     }
-    public void Put()
+    public void Put(float force, float angleX, float angleZ, float positionX)
     {
-        
+        Debug.Log("Put");
         Game game = createGame();
 
-        Shot shot = createShot();
+        Shoot shot = createShot(force, angleX, angleZ, positionX);
 
-        game.shots = new[]
-        {
-            shot, shot, shot, shot,
-        };
-        
-
-        RestClient.Put(BuildURL(), game, PutHelper);
+        game.shots = shot;
+        RestClient.Post(BuildURL(), game, PutHelper);
 
     }
-    public Shot createShot()
-    {
-        Shot shot = new Shot();
-        shot.angleX = 34;
-        shot.angleY = 34;
-        shot.hits = 3;
-        shot.force = 325;
-        shot.time = (int)DateTimeOffset.UtcNow.ToUnixTimeSeconds();
 
-        return shot;
+    public Shoot createShot(float force, float angleX, float angleZ, float positionX)
+    {
+        Shoot shot1 = new Shoot();
+        shot1.angleX = angleX;
+        shot1.angleY = angleZ;
+        shot1.force = force;
+        shot1.posX = positionX;
+        shot1.time = (int)DateTimeOffset.UtcNow.ToUnixTimeSeconds();
+        return shot1;
     }
     public Game createGame()
     {
@@ -85,8 +109,20 @@ public class DataTrackerScript : MonoBehaviour
     }
     public void PutHelper(RequestException exception, ResponseHelper response)
     {
-        Debug.Log(response.StatusCode + " data:" + response.Text);
+        string result = response.Text;
+        FirebaseKey key = JsonUtility.FromJson<FirebaseKey>(result);
+        uniqueShotName =key.name;
+        shotScript.CreateButton(key.name);
+        
+        Debug.Log("Shot added successfully. Unique key: " + key.name);
+
     }
+    [Serializable]
+    public class FirebaseKey
+    {
+        public string name;  // This will hold the unique key from Firebase
+    }
+  
 }
 
 
